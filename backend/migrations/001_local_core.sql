@@ -35,7 +35,6 @@ CREATE TABLE threats (
     published_at timestamptz,
     tags text[] NOT NULL DEFAULT '{}',
     attack_techniques text[] NOT NULL DEFAULT '{}',
-    demo boolean NOT NULL DEFAULT false,
     archived boolean NOT NULL DEFAULT false,
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now()
@@ -56,8 +55,7 @@ CREATE TABLE vulnerabilities (
     recommended_action text NOT NULL DEFAULT 'Assess',
     source_url text,
     published_at timestamptz,
-    updated_at timestamptz NOT NULL DEFAULT now(),
-    demo boolean NOT NULL DEFAULT false
+    updated_at timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX vulnerabilities_search_idx ON vulnerabilities USING gin (to_tsvector('english', coalesce(cve_id, '') || ' ' || title || ' ' || description));
 

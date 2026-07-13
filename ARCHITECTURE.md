@@ -27,7 +27,7 @@ All browser-accessible services bind to `127.0.0.1`, not a public interface. Doc
 
 ## Data safeguards
 
-- Versioned SQL migrations create the schema and seed only fictional demo data.
+- Versioned SQL migrations create and evolve the local schema.
 - Local imports are SHA-256 content-hashed before saving and duplicate-checked before indexing.
 - Source documents preserve source URL, content hash, retrieval time, and raw content.
 - Connector request logs record destination, time, outcome, status, and record counts.

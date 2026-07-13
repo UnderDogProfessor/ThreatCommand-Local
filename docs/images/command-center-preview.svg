@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="820" viewBox="0 0 1440 820" role="img" aria-labelledby="title description">
+  <title id="title">ThreatCommand Local Command Center preview</title>
+  <desc id="description">A dark local-first cybersecurity dashboard showing CISA KEVs, cybernews, detection learning, and a global attack tracker.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#071218"/><stop offset="1" stop-color="#10232c"/></linearGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#142933"/><stop offset="1" stop-color="#0b151c"/></linearGradient>
+    <radialGradient id="glow" cx="75%" cy="10%" r="70%"><stop stop-color="#51dcd2" stop-opacity=".18"/><stop offset="1" stop-color="#51dcd2" stop-opacity="0"/></radialGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="20" stdDeviation="18" flood-color="#000" flood-opacity=".38"/></filter>
+    <style>
+      .ui { font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif; }
+      .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: 1.2px; }
+      .ink { fill: #e6f7f7; } .muted { fill: #849ea7; } .cyan { fill: #7bf5ed; } .line { stroke: #2a4a55; stroke-width: 1; }
+    </style>
+  </defs>
+  <rect width="1440" height="820" fill="url(#bg)"/><rect width="1440" height="820" fill="url(#glow)"/>
+  <rect x="28" y="28" width="1384" height="764" rx="18" fill="#091218" stroke="#284953" filter="url(#shadow)"/>
+  <path d="M28 46a18 18 0 0 1 18-18h1366v56H28z" fill="#0b171e"/>
+  <circle cx="58" cy="56" r="6" fill="#ff7376"/><circle cx="80" cy="56" r="6" fill="#f4c75f"/><circle cx="102" cy="56" r="6" fill="#59d99c"/>
+  <text x="130" y="61" class="ui muted" font-size="12">127.0.0.1:3000</text>
+  <rect x="28" y="84" width="255" height="708" fill="#0a141b"/><path d="M283 84v708" class="line"/>
+  <g class="ui">
+    <circle cx="71" cy="133" r="18" fill="#183a42" stroke="#55e5dc"/><path d="M61 133h20M71 123v20" stroke="#7df5ed" stroke-width="2" stroke-linecap="round"/>
+    <text x="100" y="130" class="ink" font-size="18" font-weight="700">THREAT<tspan fill="#7df5ed">COMMAND</tspan></text><text x="100" y="148" class="mono muted" font-size="7">LOCAL INTELLIGENCE HUB</text>
+    <text x="54" y="196" class="mono muted" font-size="8">OPERATIONS</text>
+    <rect x="46" y="212" width="218" height="37" rx="7" fill="#17434a" stroke="#39817e"/>
+    <text x="62" y="236" class="cyan" font-size="13">⌘</text><text x="88" y="236" class="ink" font-size="12" font-weight="600">Command Center</text>
+    <g fill="#9ab2b9" font-size="12"><text x="63" y="281">◇</text><text x="88" y="281">Live Cybernews</text><text x="63" y="320">◇</text><text x="88" y="320">Vulnerabilities</text><text x="63" y="359">◇</text><text x="88" y="359">Detection Studio</text><text x="63" y="398">◇</text><text x="88" y="398">Threat Hunting</text><text x="63" y="437">◇</text><text x="88" y="437">Knowledge Base</text><text x="63" y="476">◇</text><text x="88" y="476">Feed Sources</text><text x="63" y="515">✦</text><text x="88" y="515">Local AI Copilot</text></g>
+    <rect x="47" y="706" width="216" height="58" rx="8" fill="#0e2128" stroke="#244a55"/><circle cx="64" cy="728" r="4" fill="#55d69b"/><text x="78" y="731" class="mono cyan" font-size="8">LOCAL DATA VAULT</text><text x="60" y="750" class="muted" font-size="9">Your database and imports stay here.</text>
+  </g>
+  <g class="ui">
+    <rect x="283" y="84" width="1129" height="58" fill="#0b171e"/><path d="M283 142h1129" class="line"/>
+    <rect x="315" y="101" width="460" height="28" rx="5" fill="#101e26" stroke="#284953"/><text x="334" y="120" class="muted" font-size="10">⌕  Search local intelligence, CVEs, IOCs…</text>
+    <rect x="1139" y="102" width="98" height="25" rx="13" fill="#123a3a" stroke="#357d77"/><text x="1156" y="119" class="mono cyan" font-size="8">● LOCAL FIRST</text><text x="1281" y="119" class="mono muted" font-size="8">✦ AI PROVIDER</text>
+    <text x="325" y="185" class="mono cyan" font-size="10">LIVE INTELLIGENCE MONITOR</text><text x="325" y="222" class="ink" font-size="30" font-weight="700">Command Center</text><text x="325" y="246" class="muted" font-size="12">New local KEVs, source-reported cybernews, and an opt-in global attack map.</text>
+    <rect x="1191" y="183" width="174" height="30" rx="15" fill="#123d39" stroke="#2e817a"/><circle cx="1211" cy="198" r="4" fill="#58db9b"/><text x="1223" y="202" class="mono" fill="#a8fff2" font-size="8">4 ENABLED SOURCES</text>
+    <rect x="325" y="278" width="335" height="131" rx="9" fill="url(#panel)" stroke="#2b505a"/><rect x="683" y="278" width="335" height="131" rx="9" fill="url(#panel)" stroke="#2b505a"/><rect x="1041" y="278" width="324" height="131" rx="9" fill="url(#panel)" stroke="#2b505a"/>
+    <text x="346" y="307" class="mono muted" font-size="8">NEW CISA KEVS · 7 DAYS</text><text x="346" y="354" class="cyan" font-size="35" font-weight="700">14</text><text x="346" y="382" class="muted" font-size="10">Review new known-exploited vulnerabilities.</text><text x="346" y="401" class="cyan" font-size="10">Review vulnerabilities →</text>
+    <text x="704" y="307" class="mono muted" font-size="8">LIVE CYBERNEWS</text><text x="704" y="354" class="cyan" font-size="35" font-weight="700">86</text><text x="704" y="382" class="muted" font-size="10">Locally stored, source-reported updates.</text><text x="704" y="401" class="cyan" font-size="10">Review cybernews →</text>
+    <text x="1062" y="307" class="mono muted" font-size="8">LEARNING DETECTIONS</text><text x="1062" y="354" class="cyan" font-size="35" font-weight="700">150</text><text x="1062" y="382" class="muted" font-size="10">Curated defensive learning templates.</text><text x="1062" y="401" class="cyan" font-size="10">Open library →</text>
+    <rect x="325" y="434" width="512" height="245" rx="9" fill="url(#panel)" stroke="#2b505a"/><rect x="853" y="434" width="512" height="245" rx="9" fill="url(#panel)" stroke="#2b505a"/>
+    <text x="347" y="463" class="mono cyan" font-size="8">NEW CISA KEVS</text><text x="347" y="487" class="ink" font-size="16" font-weight="650">Latest local vulnerability intelligence</text><text x="755" y="473" class="cyan" font-size="10">View all →</text>
+    <path d="M347 507h468M347 554h468M347 601h468" class="line"/><text x="347" y="532" class="mono cyan" font-size="9">CVE-2026-XXXX</text><text x="461" y="532" class="ink" font-size="11">Critical perimeter appliance update</text><text x="745" y="532" class="mono" fill="#f1bc68" font-size="8">LIVE KEV</text><text x="347" y="579" class="mono cyan" font-size="9">CVE-2026-XXXX</text><text x="461" y="579" class="ink" font-size="11">Identity platform exploitation advisory</text><text x="745" y="579" class="mono" fill="#f1bc68" font-size="8">LIVE KEV</text><text x="347" y="626" class="mono cyan" font-size="9">CVE-2026-XXXX</text><text x="461" y="626" class="ink" font-size="11">Secure gateway remediation guidance</text><text x="745" y="626" class="mono" fill="#f1bc68" font-size="8">LIVE KEV</text>
+    <text x="875" y="463" class="mono cyan" font-size="8">LIVE CYBERNEWS</text><text x="875" y="487" class="ink" font-size="16" font-weight="650">Source-reported intelligence stream</text><text x="1282" y="473" class="cyan" font-size="10">All cybernews →</text>
+    <path d="M875 507h468M875 554h468M875 601h468" class="line"/><text x="875" y="532" class="mono" fill="#a38de6" font-size="8">RESEARCH</text><text x="966" y="532" class="ink" font-size="11">New zero-day exploitation reporting</text><text x="1280" y="532" class="cyan" font-size="9">Read →</text><text x="875" y="579" class="mono" fill="#a38de6" font-size="8">CISA</text><text x="966" y="579" class="ink" font-size="11">Advisory highlights active exploitation</text><text x="1280" y="579" class="cyan" font-size="9">Read →</text><text x="875" y="626" class="mono" fill="#a38de6" font-size="8">CLOUD</text><text x="966" y="626" class="ink" font-size="11">Security bulletin and mitigation notes</text><text x="1280" y="626" class="cyan" font-size="9">Read →</text>
+    <rect x="325" y="700" width="1040" height="62" rx="9" fill="#0d252c" stroke="#2b505a"/><text x="347" y="728" class="mono cyan" font-size="8">GLOBAL ATTACK TRACKER</text><text x="347" y="749" class="muted" font-size="10">Opt-in external near-real-time telemetry · disconnected by default</text>
+    <g transform="translate(1084 712)"><path d="M0 33c26-30 55-26 84 0-30 28-59 31-84 0Z" fill="#102f38" stroke="#4a9997"/><circle cx="21" cy="33" r="3" fill="#7df5ed"/><circle cx="48" cy="20" r="3" fill="#f1bc68"/><circle cx="68" cy="41" r="3" fill="#7df5ed"/><path d="M21 33 48 20 68 41" fill="none" stroke="#56bdb7" stroke-width="1" opacity=".75"/></g>
+  </g>
+</svg>
