@@ -8,7 +8,7 @@
 
 - **Current evidence-based readiness:** **8.2/10**
 - **Engineering progress:** the highest-value remaining code-level gaps—local semantic retrieval, parser-backed Sigma checks, dialog focus handling, clean build output, and clone-friendly security checks—have been addressed.
-- **9/10 gate:** not yet claimable as an overall operational/public-release score. It requires three owner-controlled actions: selecting a license and private security contact, enabling and exercising the local semantic model with real reviewed knowledge, and confirming workstation/data-protection controls.
+- **9/10 gate:** not yet claimable as an overall operational/public-release score. It requires the remaining owner-controlled actions: adding a private security contact, enabling and exercising the local semantic model with real reviewed knowledge, and confirming workstation/data-protection controls.
 
 This deliberately distinguishes implemented capability from unperformed owner actions. Re-labeling an unconfigured model, an unselected license, or unverified device encryption as complete would be misleading.
 
@@ -39,7 +39,7 @@ This deliberately distinguishes implemented capability from unperformed owner ac
 
 | Owner-controlled gate | Why it cannot be automated safely | Completion evidence |
 |---|---|---|
-| Choose a public license and private security contact | This is a legal and operational ownership decision. | Add a chosen `LICENSE` file and replace the placeholder contact in `SECURITY.md`. |
+| Add a private security contact | A monitored private reporting channel is an operational ownership decision. | Replace the placeholder contact in `SECURITY.md`. |
 | Activate and exercise semantic retrieval | The audit must not invent an Ollama model or upload/import private knowledge. | Configure a 768-dimension local Ollama embedding model, rebuild the index from reviewed local knowledge, and verify a cited retrieval in the Knowledge Base. |
 | Confirm workstation protection | Source code cannot enable or attest to your Windows sign-in, BitLocker/device encryption, backup passphrase, or physical-device controls. | Enable/confirm full-disk encryption and make/verify an encrypted backup with a passphrase you control. |
 | Validate detections in an authorized platform | This installation has no SIEM workspace, telemetry, or harmless fixture corpus supplied by the owner. | Record benign fixture results for priority Sigma/KQL detections in the Detection Lifecycle workspace. |

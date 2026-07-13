@@ -45,7 +45,7 @@ Stop services while preserving the database:
 
 ## Prepare a public clone
 
-The project is ready to be committed to a GitHub repository, but no remote repository has been created or changed by ThreatCommand itself. Before publishing, choose and add a license that matches how you want others to use the project, replace the placeholder security contact in `SECURITY.md`, and confirm that `.env` plus all `data/` folders remain untracked.
+The project is published under the [MIT License](LICENSE). Before treating a public release as complete, replace the placeholder private security contact in `SECURITY.md` and confirm that `.env` plus all `data/` folders remain untracked.
 
 Anyone cloning the published repository should be able to run:
 
