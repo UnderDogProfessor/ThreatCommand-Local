@@ -1,6 +1,28 @@
 # ThreatCommand Local
 
-ThreatCommand Local is a private, local-first cybersecurity command center. The current build includes a local database, API, imports, search, scheduled or manual connector controls, learning detections, detection lifecycle records, local evidence/case workspaces, retention and audit views, integrity-manifested local handover exports, backups, and a Next.js frontend.
+> A local-first cybersecurity command center for staying current on CISA KEVs, cybernews, defensive detections, and investigation knowledge—without handing your workspace to a hosted platform.
+
+<p align="center">
+  <img src="docs/images/command-center-preview.svg" alt="Illustrative ThreatCommand Local Command Center preview showing live CISA KEVs, cybernews, detection learning, and a global attack tracker" width="100%" />
+</p>
+
+<p align="center"><sub>Illustrative Command Center preview. Your locally synchronized sources, records, and settings determine what appears in the application.</sub></p>
+
+## Why ThreatCommand Local?
+
+| Stay current | Learn defensively | Keep control |
+| --- | --- | --- |
+| Review new CISA KEVs and source-reported cybernews in one focused workspace. | Study 150 defensive detection templates across On-Prem, Cloud, and Incident Response. | Run locally on your computer with opt-in feeds, Offline Mode, local data controls, and no hosted account. |
+
+## Start in three steps
+
+```powershell
+git clone https://github.com/UnderDogProfessor/ThreatCommand-Local.git
+cd ThreatCommand-Local
+.\start-local.bat
+```
+
+Then open http://127.0.0.1:3000 and create your local workspace passphrase.
 
 > Demo data — not live threat intelligence. The bundled records are fictional. Never treat them as evidence of real compromise, exposure, attribution, or vulnerability.
 
