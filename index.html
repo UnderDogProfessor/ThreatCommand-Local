@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080c11">
+  <title>ThreatCommand Local</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand-row">
+        <div class="brand-mark" aria-hidden="true"><span></span><i></i><b></b></div>
+        <div class="brand-copy"><strong>THREAT<span>COMMAND</span></strong><small>LOCAL // COMMAND CENTER</small></div>
+        <button class="icon-button mobile-close" id="mobile-close" aria-label="Close navigation">×</button>
+      </div>
+      <div class="nav-caption">OPERATIONS</div>
+      <nav id="main-nav" aria-label="Main navigation">
+        <button class="nav-item active" data-view="command"><span class="nav-icon">⌘</span><span>Command Center</span></button>
+        <button class="nav-item" data-view="priority"><span class="nav-icon">◈</span><span>Priority Threats</span><em>4</em></button>
+        <button class="nav-item" data-view="explorer"><span class="nav-icon">⌕</span><span>Intelligence Explorer</span></button>
+        <button class="nav-item" data-view="vulnerabilities"><span class="nav-icon">◇</span><span>Vulnerabilities</span><em>7</em></button>
+        <button class="nav-item" data-view="actors"><span class="nav-icon">◎</span><span>Actors & Malware</span></button>
+        <button class="nav-item" data-view="iocs"><span class="nav-icon">◌</span><span>IOC Intelligence</span></button>
+      </nav>
+      <div class="nav-caption">WORKSPACES</div>
+      <nav>
+        <button class="nav-item" data-view="detection"><span class="nav-icon">⌬</span><span>Detection Studio</span></button>
+        <button class="nav-item" data-view="hunting"><span class="nav-icon">↗</span><span>Threat Hunting</span></button>
+        <button class="nav-item" data-view="knowledge"><span class="nav-icon">▤</span><span>Knowledge Base</span></button>
+        <button class="nav-item" data-view="digest"><span class="nav-icon">▱</span><span>Digest Studio</span></button>
+      </nav>
+      <div class="nav-caption">SYSTEM</div>
+      <nav>
+        <button class="nav-item" data-view="feeds"><span class="nav-icon">⌁</span><span>Feed Sources</span></button>
+        <button class="nav-item" data-view="copilot"><span class="nav-icon">✦</span><span>Local AI Copilot</span></button>
+        <button class="nav-item" data-view="settings"><span class="nav-icon">⚙</span><span>Settings</span></button>
+        <button class="nav-item" data-view="backup"><span class="nav-icon">⧉</span><span>Backup & Restore</span></button>
+      </nav>
+      <div class="rail-footer">
+        <div class="footer-label"><span class="status-dot"></span> LOCAL DATA VAULT</div>
+        <div class="storage-bar"><i></i></div>
+        <small>1.8 GB of 50 GB planned</small>
+      </div>
+    </aside>
+
+    <main class="main-area">
+      <header class="topbar">
+        <button class="icon-button menu-button" id="menu-button" aria-label="Open navigation">☰</button>
+        <button class="search-box" id="search-button"><span>⌕</span><span>Search local intelligence, CVEs, IOCs...</span><kbd>⌘ K</kbd></button>
+        <div class="top-actions">
+          <span class="top-pill local"><i></i>LOCAL ONLY</span>
+          <button class="top-pill mode" id="mode-toggle"><i></i><span id="mode-text">MANUAL SYNC</span></button>
+          <button class="sync-button" id="sync-button"><span>↻</span> Sync</button>
+          <button class="model-status" data-view="copilot"><span>✦</span><b>Ollama</b><small>Not connected</small></button>
+          <button class="icon-button notification" id="notification-button" aria-label="Notifications">♧<i>3</i></button>
+          <button class="avatar" title="Local analyst profile">SL</button>
+        </div>
+      </header>
+
+      <section class="content" id="view-command">
+        <div class="crumb"><span>LOCAL WORKSPACE</span><i>/</i> COMMAND CENTER <b>DEMO DATA — NOT LIVE THREAT INTELLIGENCE</b></div>
+        <div class="page-heading">
+          <div><p class="eyebrow">SITUATIONAL AWARENESS</p><h1>Command Center</h1><p>Evidence-led intelligence for your local defensive workflow.</p></div>
+          <div class="heading-meta"><span class="pulse-dot"></span><span>NO LIVE NETWORK ACTIVITY</span><small>Local demo snapshot · Jul 12, 2026, 09:42 EDT</small></div>
+        </div>
+
+        <section class="status-ribbon" aria-label="Local prototype status">
+          <div><span class="ribbon-icon">⌂</span><strong>Private by design.</strong> This Phase 1 prototype runs locally and contains only fictional synthetic data.</div>
+          <button data-view="settings">Review privacy controls <span>→</span></button>
+        </section>
+
+        <section class="metrics-grid">
+          <article class="posture-card panel">
+            <div class="card-top"><span class="micro-label">LOCAL THREAT POSTURE</span><button class="tiny-button" data-toast="Scoring methodology is transparent and configurable in Phase 2.">ⓘ</button></div>
+            <div class="posture-body"><div class="score-ring"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="51"></circle><circle class="score-progress" cx="60" cy="60" r="51"></circle></svg><div><strong>68</strong><small>/100</small></div></div><div><span class="severity elevated">ELEVATED</span><p>Driven by 2 high-priority fictional campaign signals and 3 potential technology matches.</p></div></div>
+            <div class="score-legend"><span><i class="critical-dot"></i>Critical</span><span><i class="elevated-dot"></i>Elevated</span><span><i class="stable-dot"></i>Stable</span><button data-toast="Demo scoring inputs: severity, recency, potential relevance, confidence.">View score inputs →</button></div>
+          </article>
+          <article class="metric-card panel"><div class="metric-head"><span class="micro-label">PRIORITY ITEMS</span><span class="change up">↑ 3</span></div><strong>12</strong><p>4 require analyst review</p><div class="sparkline amber"><i style="height:30%"></i><i style="height:42%"></i><i style="height:28%"></i><i style="height:52%"></i><i style="height:44%"></i><i style="height:72%"></i><i style="height:62%"></i><i style="height:92%"></i></div></article>
+          <article class="metric-card panel"><div class="metric-head"><span class="micro-label">DETECTION COVERAGE</span><span class="change neutral">+2 drafts</span></div><strong>46<span>%</span></strong><p>12 relevant techniques tracked</p><div class="segmented-bar"><i class="green" style="width:46%"></i><i class="amber" style="width:24%"></i><i class="gray" style="width:30%"></i></div><div class="bar-key"><span>Validated</span><span>Draft</span><span>Gap</span></div></article>
+          <article class="metric-card panel"><div class="metric-head"><span class="micro-label">LOCAL KNOWLEDGE</span><span class="change cyan">+18 records</span></div><strong>248</strong><p>All records are fictional demo data</p><div class="mini-stats"><span><b>32</b> Reports</span><span><b>91</b> IOCs</span><span><b>14</b> CVEs</span></div></article>
+        </section>
+
+        <section class="main-grid">
+          <article class="panel changes-panel">
+            <div class="panel-heading"><div><p class="micro-label">WHAT CHANGED</p><h2>Analyst brief</h2></div><div class="heading-controls"><button class="time-filter active">24H</button><button class="time-filter">7D</button><button class="tiny-button" data-view="digest">View digest →</button></div></div>
+            <div class="analyst-brief"><div class="brief-symbol">✦</div><div><p><strong>Two fictional campaign updates</strong> are now priority items due to potential relevance for cloud identity and collaboration tooling. One synthetic CVE gained a simulated KEV designation.</p><div class="citation-line"><span>Source records: <button class="linkish" data-threat="0">TC-DEMO-024</button>, <button class="linkish" data-threat="1">TC-DEMO-017</button>, <button class="linkish" data-view="vulnerabilities">CVE-2026-00042</button></span><span>Confidence: <b>HIGH</b></span></div></div></div>
+            <div class="change-timeline"><div class="timeline-event"><time>09:42</time><i class="cyan-dot"></i><p><b>Demo analyst summary refreshed</b><span>Based only on local synthetic records</span></p></div><div class="timeline-event"><time>08:10</time><i class="amber-dot"></i><p><b>Potential cloud identity relevance</b><span>Needs confirmation against actual environment</span></p></div><div class="timeline-event"><time>Yesterday</time><i class="purple-dot"></i><p><b>Detection draft added</b><span>T1078 Valid Accounts coverage opportunity</span></p></div></div>
+          </article>
+          <article class="panel action-panel"><div class="panel-heading"><div><p class="micro-label">PERSONAL ACTION QUEUE</p><h2>Next best actions</h2></div><button class="tiny-button" data-view="priority">View all →</button></div><div id="action-queue"></div><button class="queue-button" id="add-action">+ Add local action</button></article>
+        </section>
+
+        <section class="section-title"><div><p class="micro-label">EVIDENCE-LED TRIAGE</p><h2>Priority threats</h2></div><div class="threat-filters"><button class="filter-chip active">All <b>4</b></button><button class="filter-chip">Critical <b>1</b></button><button class="filter-chip">High <b>3</b></button><button class="tiny-button" data-view="priority">Explore threats →</button></div></section>
+        <section class="threat-grid" id="threat-grid"></section>
+
+        <section class="intel-grid">
+          <article class="panel map-panel"><div class="panel-heading"><div><p class="micro-label">THREAT ACTIVITY MAP</p><h2>Attributed activity signals</h2></div><div class="map-note"><i></i> ATTRIBUTION UNCERTAIN</div></div><div class="map-visual"><div class="map-grid"></div><svg viewBox="0 0 700 300" preserveAspectRatio="none" aria-label="Stylised demo threat map"><path d="M42 88l69-43 75 14 45 44-25 31-61 14-47-10-56-9-23-42zm225-38 67-22 83 34 21 57-40 27-73-10-58-29zm162 72 76-21 96 21 50 48-35 46-102 13-54-26-31-45zm-88 89 44-18 45 37-17 49-37 5-30-38zM87 178l57-5 29 44-20 49-45-10-27-38z"/></svg><span class="signal sig-a"></span><span class="signal sig-b"></span><span class="signal sig-c"></span><span class="signal sig-d"></span><div class="map-tooltip"><b>North America</b><span>6 local demo observations</span><small>Medium confidence</small></div></div><div class="map-footer"><span><i class="teal-marker"></i>Observed in source claims</span><span><i class="amber-marker"></i>Potential relevance</span><button data-toast="Map filters are a visual prototype in Phase 1.">Filter map →</button></div></article>
+          <article class="panel trends-panel"><div class="panel-heading"><div><p class="micro-label">TREND ANALYTICS</p><h2>Priority volume</h2></div><select aria-label="Trend range"><option>Last 30 days</option><option>Last 7 days</option></select></div><div class="chart-key"><span><i></i> Priority reports</span><span><i></i> CVE mentions</span></div><div class="bar-chart" aria-label="Demo 30 day trend chart"><div><i style="height:31%"></i><b style="height:19%"></b><span>Jun 15</span></div><div><i style="height:42%"></i><b style="height:24%"></b></div><div><i style="height:36%"></i><b style="height:34%"></b><span>Jun 22</span></div><div><i style="height:58%"></i><b style="height:33%"></b></div><div><i style="height:46%"></i><b style="height:48%"></b><span>Jun 29</span></div><div><i style="height:72%"></i><b style="height:39%"></b></div><div><i style="height:88%"></i><b style="height:62%"></b><span>Jul 06</span></div><div><i style="height:64%"></i><b style="height:55%"></b></div><div><i style="height:91%"></i><b style="height:72%"></b><span>Today</span></div></div><div class="chart-summary"><span><b>+31%</b> priority volume</span><span>vs. prior 30 days</span></div></article>
+          <article class="panel coverage-panel"><div class="panel-heading"><div><p class="micro-label">DETECTION COVERAGE</p><h2>Relevant ATT&amp;CK</h2></div><button class="tiny-button" data-view="detection">Studio →</button></div><div class="coverage-list"><div><span class="coverage-code">T1078</span><p>Valid Accounts<small>Potential identity campaign tie</small></p><b class="coverage-state gap">GAP</b></div><div><span class="coverage-code">T1566</span><p>Phishing<small>Draft rule available</small></p><b class="coverage-state draft">DRAFT</b></div><div><span class="coverage-code">T1059.001</span><p>PowerShell<small>Validated demo rule</small></p><b class="coverage-state valid">VALIDATED</b></div></div><button class="coverage-link" data-view="detection">View ATT&amp;CK matrix <span>→</span></button></article>
+        </section>
+      </section>
+
+      <section class="content hidden" id="view-generic"></section>
+    </main>
+  </div>
+
+  <div class="modal-backdrop hidden" id="modal-backdrop"></div>
+  <section class="modal hidden" id="threat-modal" aria-modal="true" role="dialog" aria-labelledby="modal-title"><button class="modal-close" data-close-modal>×</button><div id="modal-content"></div></section>
+  <section class="command-palette hidden" id="command-palette"><div class="palette-input"><span>⌕</span><input id="palette-input" placeholder="Search local demo data or jump to a workspace" autofocus><kbd>ESC</kbd></div><p class="palette-label">QUICK NAVIGATION</p><div id="palette-options"></div></section>
+  <div class="toast hidden" id="toast" role="status"></div>
+  <script src="app.js"></script>
+</body>
+</html>

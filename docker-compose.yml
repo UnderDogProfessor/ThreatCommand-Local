@@ -1,0 +1,76 @@
+name: threatcommand-local
+
+services:
+  database:
+    image: pgvector/pgvector@sha256:1d533553fefe4f12e5d80c7b80622ba0c382abb5758856f52983d8789179f0fb
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-threatcommand}
+      POSTGRES_USER: ${POSTGRES_USER:-threatcommand}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env before starting ThreatCommand Local}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks: [local-only]
+
+  api:
+    build: ./backend
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-threatcommand}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env before starting ThreatCommand Local}@database:5432/${POSTGRES_DB:-threatcommand}
+      DATA_DIRECTORY: /app/data
+    command: sh -c "python -m app.migrate && uvicorn app.main:app --host 0.0.0.0 --port 8000"
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      database:
+        condition: service_healthy
+    networks: [local-only]
+
+  worker:
+    build: ./backend
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-threatcommand}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env before starting ThreatCommand Local}@database:5432/${POSTGRES_DB:-threatcommand}
+      DATA_DIRECTORY: /app/data
+    command: python -m app.worker
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      database:
+        condition: service_healthy
+    networks: [local-only]
+
+  frontend:
+    build: ./frontend
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+    environment:
+      NEXT_PUBLIC_API_URL: http://127.0.0.1:8000
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      - api
+    networks: [local-only]
+
+networks:
+  local-only:
+    name: threatcommand-local-network

@@ -1,0 +1,10 @@
+{
+  "name": "threatcommand-local-phase-1",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ThreatCommand Local — offline Phase 1 visual prototype",
+  "scripts": {
+    "start": "node server.js",
+    "health": "node health-check.js"
+  }
+}
