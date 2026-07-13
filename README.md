@@ -24,7 +24,7 @@ cd ThreatCommand-Local
 
 Then open http://127.0.0.1:3000 and create your local workspace passphrase.
 
-> Demo data — not live threat intelligence. The bundled records are fictional. Never treat them as evidence of real compromise, exposure, attribution, or vulnerability.
+> ThreatCommand Local stores source-reported intelligence on your device. Treat every record as intelligence to validate, never as proof of local compromise, exposure, attribution, or vulnerability.
 
 ## Privacy promise
 
@@ -104,7 +104,7 @@ Indexing is never automatic. If Ollama is unavailable, the app labels the fallba
 
 ## Current capabilities
 
-- PostgreSQL + pgvector database with versioned SQL migrations and a synthetic seed.
+- PostgreSQL + pgvector database with versioned SQL migrations.
 - FastAPI local API and OpenAPI reference.
 - Local threat, vulnerability, action, detection, knowledge-base, connector, and digest records.
 - Full-text local search across threats, CVEs, and knowledge items.
@@ -154,6 +154,6 @@ Backups are saved under `data\backups`. Keep encrypted copies on an external dri
 - **Port 3000, 5432, or 8000 is busy:** stop the conflicting local program, then run `start-local.bat` again.
 - **API health check fails:** run `docker compose ps` and then `docker compose logs api` in this folder.
 - **Ollama is unavailable:** Copilot stays disabled; the rest of the app remains functional. Start Ollama locally and set an installed model name in `.env` when you are ready.
-- **Need no networking at all:** use Offline Mode in Settings before enabling any source. The initial demo dataset remains usable offline.
+- **Need no networking at all:** use Offline Mode in Settings before enabling any source. You can still work with records already stored locally.
 
 See [ARCHITECTURE.md](ARCHITECTURE.md), [PRIVACY.md](PRIVACY.md), [CONNECTORS.md](CONNECTORS.md), and [BACKUP-RESTORE.md](BACKUP-RESTORE.md) for the operational details.

@@ -100,8 +100,8 @@ def sync_cisa_kev(connector: dict) -> dict:
             cur.execute("SELECT id FROM vulnerabilities WHERE cve_id = %s", (cve,))
             exists = cur.fetchone() is not None
             cur.execute(
-                """INSERT INTO vulnerabilities (cve_id, title, description, severity, kev, exploitation_evidence, affected_products, potential_relevance, recommended_action, source_url, published_at, demo)
-                   VALUES (%s, %s, %s, 'high', true, %s, %s, 'Potential relevance: confirm local inventory and affected version.', 'Assess', %s, %s, false)
+                """INSERT INTO vulnerabilities (cve_id, title, description, severity, kev, exploitation_evidence, affected_products, potential_relevance, recommended_action, source_url, published_at)
+                   VALUES (%s, %s, %s, 'high', true, %s, %s, 'Potential relevance: confirm local inventory and affected version.', 'Assess', %s, %s)
                    ON CONFLICT (cve_id) DO UPDATE SET kev = true, exploitation_evidence = EXCLUDED.exploitation_evidence, updated_at = now()""",
                 (cve, item.get("vulnerabilityName", cve), item.get("shortDescription", ""), item.get("requiredAction", "CISA KEV entry"), [item.get("product", "Unknown product")], destination, item.get("dateAdded")),
             )
@@ -220,8 +220,8 @@ def sync_rss(connector: dict) -> dict:
             existing_threat = cur.fetchone()
             reference_id = existing_threat["reference_id"] if existing_threat else f"RSS-{connector['key'].upper()}-{hashlib.sha256(source_item_key.encode('utf-8')).hexdigest()[:10]}"
             cur.execute(
-                """INSERT INTO threats (reference_id, title, category, severity, confidence, summary, potential_relevance, source_count, source_document_id, published_at, tags, demo)
-                   VALUES (%s, %s, 'Cyber news / source-reported', %s, 'source reported', %s, 'Potential relevance: validate affected technology, scope, and corroborating evidence.', 1, %s, %s, %s, false)
+                """INSERT INTO threats (reference_id, title, category, severity, confidence, summary, potential_relevance, source_count, source_document_id, published_at, tags)
+                   VALUES (%s, %s, 'Cyber news / source-reported', %s, 'source reported', %s, 'Potential relevance: validate affected technology, scope, and corroborating evidence.', 1, %s, %s, %s)
                    ON CONFLICT (reference_id) DO UPDATE SET title = EXCLUDED.title, summary = EXCLUDED.summary, severity = EXCLUDED.severity, tags = EXCLUDED.tags, source_document_id = EXCLUDED.source_document_id, published_at = EXCLUDED.published_at, updated_at = now()""",
                 (reference_id, entry["title"], severity, entry["summary"][:4000] or "Source-reported RSS item; review the original source link.", document["id"], entry["published"], tags),
             )
@@ -285,8 +285,8 @@ def sync_nvd(connector: dict) -> dict:
             )
             source_revisions += 1 if cur.fetchone() else 0
             cur.execute(
-                """INSERT INTO vulnerabilities (cve_id, title, description, severity, cvss, affected_products, potential_relevance, recommended_action, source_url, published_at, demo)
-                   VALUES (%s, %s, %s, %s, %s, ARRAY['See NVD record'], 'Potential relevance: confirm local inventory and affected version.', 'Assess', %s, %s, false)
+                """INSERT INTO vulnerabilities (cve_id, title, description, severity, cvss, affected_products, potential_relevance, recommended_action, source_url, published_at)
+                   VALUES (%s, %s, %s, %s, %s, ARRAY['See NVD record'], 'Potential relevance: confirm local inventory and affected version.', 'Assess', %s, %s)
                    ON CONFLICT (cve_id) DO UPDATE SET title = EXCLUDED.title, description = EXCLUDED.description, severity = EXCLUDED.severity,
                    cvss = EXCLUDED.cvss, source_url = EXCLUDED.source_url, updated_at = now()""",
                 (cve_id, cve_id, description, severity if severity in {"critical", "high", "medium", "low"} else "medium", score, source_url, cve.get("published")),

@@ -129,8 +129,8 @@ async def local_access_guard(request: Request, call_next):
     return await call_next(request)
 
 
-def demo_notice() -> str:
-    return "Demo data — not live threat intelligence. Confirm evidence before taking any action."
+def intelligence_notice() -> str:
+    return "Source-reported intelligence is stored locally. Confirm evidence before taking action."
 
 
 def normalize_ioc(value: str, indicator_type: str) -> str:
@@ -203,7 +203,7 @@ def detection_learning_context(item: dict) -> dict:
         "false_positives": "Authorized administrators, automation, software deployment, IT maintenance, and incident-response tooling can generate similar telemetry. Do not block or isolate anything automatically.",
         "tuning": "Start in a narrow test scope. Add known approved administrative accounts, management hosts, maintenance windows, and expected parent processes only after documenting why each exception is safe.",
         "how_to_use": "Read the rule/query as a defensive learning example. Validate required telemetry, expected administrative activity, scope, and false positives in an authorized environment before any deployment.",
-        "validation": "Use benign or synthetic test activity only. Do not deploy or execute this content automatically.",
+        "validation": "Use authorized test activity only. Do not deploy or execute this content automatically.",
         "limitations": "DRAFT — HUMAN REVIEW REQUIRED. This library is educational and does not prove detection coverage or production safety.",
     }
 
@@ -251,7 +251,7 @@ def lock_local_access() -> JSONResponse:
 @app.get("/api/health")
 def health() -> dict:
     row = fetch_one("SELECT now() AS database_time")
-    return {"status": "healthy", "scope": "local-only", "database_time": row["database_time"], "demo_notice": demo_notice()}
+    return {"status": "healthy", "scope": "local-only", "database_time": row["database_time"], "intelligence_notice": intelligence_notice()}
 
 
 @app.get("/api/settings")
@@ -352,8 +352,8 @@ def update_ioc(ioc_id: str, payload: IocUpdate) -> dict:
 def list_vulnerability_priorities(limit: int = Query(default=100, ge=1, le=500)) -> dict:
     profiles = fetch_all("SELECT * FROM technology_profiles WHERE status = 'active'")
     assessments = {item["reference_id"]: item for item in fetch_all("SELECT * FROM relevance_assessments WHERE entity_type = 'vulnerability'")}
-    vulnerabilities = fetch_all("""SELECT cve_id, title, description, severity, cvss, kev, affected_products, source_url, published_at, updated_at, demo
-                                 FROM vulnerabilities WHERE NOT demo ORDER BY kev DESC, updated_at DESC LIMIT %s""", (limit,))
+    vulnerabilities = fetch_all("""SELECT cve_id, title, description, severity, cvss, kev, affected_products, source_url, published_at, updated_at
+                                 FROM vulnerabilities ORDER BY kev DESC, updated_at DESC LIMIT %s""", (limit,))
     items = [{**item, "priority": vulnerability_priority(item, profiles, assessments.get(item["cve_id"]))} for item in vulnerabilities]
     items.sort(key=lambda item: (item["priority"]["score"], item["kev"], item["updated_at"]), reverse=True)
     return {"items": items, "technology_profiles": len(profiles), "local_only": True}
@@ -368,26 +368,26 @@ def intelligence_review_queue() -> dict:
 
 @app.get("/api/dashboard")
 def dashboard() -> dict:
-    threats = fetch_all("SELECT reference_id, title, category, severity, confidence, summary, potential_relevance, source_count, published_at, tags, attack_techniques, demo FROM threats WHERE NOT archived ORDER BY CASE severity WHEN 'critical' THEN 1 WHEN 'high' THEN 2 WHEN 'medium' THEN 3 ELSE 4 END, published_at DESC LIMIT 8")
+    threats = fetch_all("SELECT reference_id, title, category, severity, confidence, summary, potential_relevance, source_count, published_at, tags, attack_techniques FROM threats WHERE NOT archived ORDER BY CASE severity WHEN 'critical' THEN 1 WHEN 'high' THEN 2 WHEN 'medium' THEN 3 ELSE 4 END, published_at DESC LIMIT 8")
     actions = fetch_all("SELECT id, title, action_type, priority, linked_reference, due_at, created_at FROM actions WHERE status = 'open' ORDER BY CASE priority WHEN 'critical' THEN 1 WHEN 'high' THEN 2 WHEN 'medium' THEN 3 ELSE 4 END, created_at DESC LIMIT 8")
     coverage = fetch_all("SELECT unnest(attack_techniques) AS technique, status, count(*) AS count FROM detections GROUP BY technique, status ORDER BY technique")
-    vulnerabilities = fetch_all("SELECT cve_id, title, severity, kev, potential_relevance, recommended_action, demo FROM vulnerabilities ORDER BY kev DESC, demo ASC, updated_at DESC LIMIT 5")
-    vulnerability_summary = fetch_one("SELECT count(*) AS total, count(*) FILTER (WHERE NOT demo) AS live_count, count(*) FILTER (WHERE demo) AS demo_count, count(*) FILTER (WHERE kev AND NOT demo) AS live_kev_count FROM vulnerabilities")
+    vulnerabilities = fetch_all("SELECT cve_id, title, severity, kev, potential_relevance, recommended_action FROM vulnerabilities ORDER BY kev DESC, updated_at DESC LIMIT 5")
+    vulnerability_summary = fetch_one("SELECT count(*) AS total, count(*) FILTER (WHERE kev) AS live_kev_count FROM vulnerabilities")
     recent_kevs = fetch_all("""SELECT cve_id, title, severity, potential_relevance, source_url, published_at FROM vulnerabilities
-                              WHERE NOT demo AND kev ORDER BY published_at DESC NULLS LAST, updated_at DESC LIMIT 10""")
-    new_kev_count = fetch_one("SELECT count(*) AS count FROM vulnerabilities WHERE NOT demo AND kev AND published_at >= now() - interval '7 days'")["count"]
+                              WHERE kev ORDER BY published_at DESC NULLS LAST, updated_at DESC LIMIT 10""")
+    new_kev_count = fetch_one("SELECT count(*) AS count FROM vulnerabilities WHERE kev AND published_at >= now() - interval '7 days'")["count"]
     live_news = fetch_all("""SELECT t.reference_id, t.title, t.summary, t.severity, t.tags, t.published_at, s.source_url, s.connector_key
                              FROM threats t JOIN source_documents s ON s.id = t.source_document_id
-                             WHERE NOT t.demo AND s.connector_key LIKE '%%-rss' ORDER BY t.published_at DESC NULLS LAST, t.updated_at DESC LIMIT 10""")
+                             WHERE s.connector_key LIKE '%%-rss' ORDER BY t.published_at DESC NULLS LAST, t.updated_at DESC LIMIT 10""")
     zero_day_watch = fetch_all("""SELECT t.reference_id, t.title, t.summary, t.severity, t.published_at, s.source_url, s.connector_key
                                  FROM threats t JOIN source_documents s ON s.id = t.source_document_id
-                                 WHERE NOT t.demo AND t.tags @> ARRAY['zero-day-watch'] ORDER BY t.published_at DESC NULLS LAST LIMIT 10""")
+                                 WHERE t.tags @> ARRAY['zero-day-watch'] ORDER BY t.published_at DESC NULLS LAST LIMIT 10""")
     feed_health = fetch_all("SELECT key, name, enabled, last_status, last_sync_at, records_added, records_updated, records_failed FROM connectors ORDER BY enabled DESC, name")
     learning_library = fetch_all("SELECT segment, count(*) AS count FROM detections WHERE learning_purpose GROUP BY segment ORDER BY segment")
     setting = fetch_one("SELECT network_mode FROM settings WHERE id = 1")
     return {
-        "demo_notice": demo_notice(), "network_mode": setting["network_mode"],
-        "data_status": {**vulnerability_summary, "notice": "Live CISA KEV records are stored locally. Demo records remain visibly labeled." if vulnerability_summary["live_count"] else demo_notice()},
+        "intelligence_notice": intelligence_notice(), "network_mode": setting["network_mode"],
+        "data_status": {**vulnerability_summary, "notice": intelligence_notice()},
         "posture": {"score": 68, "label": "elevated", "inputs": ["priority severity", "recency", "source confidence", "potential technology relevance"], "limitation": "This is a transparent prioritization aid, not proof of exposure or compromise."},
         "threats": threats, "actions": actions, "coverage": coverage, "vulnerabilities": vulnerabilities, "vulnerability_summary": vulnerability_summary,
         "live_overview": {"new_kev_7d": new_kev_count, "recent_kevs": recent_kevs, "live_news": live_news, "zero_day_watch": zero_day_watch, "feed_health": feed_health, "learning_library": learning_library},
@@ -404,32 +404,30 @@ def list_threats(q: str | None = None) -> list[dict]:
 @app.get("/api/vulnerabilities")
 def list_vulnerabilities(
     q: str | None = None,
-    dataset: str = Query(default="all", pattern="^(all|live|demo)$"),
+    dataset: str = Query(default="all", pattern="^(all|live)$"),
     limit: int = Query(default=50, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
 ) -> dict:
     filters: list[str] = []
     params: list[object] = []
     if dataset == "live":
-        filters.append("NOT demo")
-    elif dataset == "demo":
-        filters.append("demo")
+        filters.append("kev")
     if q:
         filters.append("to_tsvector('english', coalesce(cve_id, '') || ' ' || title || ' ' || description) @@ websearch_to_tsquery('english', %s)")
         params.append(q)
     where = f"WHERE {' AND '.join(filters)}" if filters else ""
-    counts = fetch_one("SELECT count(*) AS total, count(*) FILTER (WHERE NOT demo) AS live_count, count(*) FILTER (WHERE demo) AS demo_count, count(*) FILTER (WHERE kev AND NOT demo) AS live_kev_count FROM vulnerabilities")
+    counts = fetch_one("SELECT count(*) AS total, count(*) FILTER (WHERE kev) AS live_kev_count FROM vulnerabilities")
     total = fetch_one(f"SELECT count(*) AS count FROM vulnerabilities {where}", tuple(params))["count"]
     items = fetch_all(f"""SELECT cve_id, title, description, severity, cvss, kev, exploitation_evidence, affected_products, potential_relevance,
-                         recommended_action, source_url, published_at, updated_at, demo
-                         FROM vulnerabilities {where} ORDER BY kev DESC, demo ASC, updated_at DESC LIMIT %s OFFSET %s""", tuple(params + [limit, offset]))
+                         recommended_action, source_url, published_at, updated_at
+                         FROM vulnerabilities {where} ORDER BY kev DESC, updated_at DESC LIMIT %s OFFSET %s""", tuple(params + [limit, offset]))
     return {"items": items, "total": total, "offset": offset, "limit": limit, "counts": counts}
 
 
 @app.get("/api/vulnerabilities/{cve_id}")
 def vulnerability_detail(cve_id: str) -> dict:
     item = fetch_one("""SELECT cve_id, title, description, severity, cvss, kev, exploitation_evidence, affected_products, potential_relevance,
-                        recommended_action, source_url, published_at, updated_at, demo FROM vulnerabilities WHERE cve_id = %s""", (cve_id,))
+                        recommended_action, source_url, published_at, updated_at FROM vulnerabilities WHERE cve_id = %s""", (cve_id,))
     if not item:
         raise HTTPException(404, "Vulnerability record not found")
     return {"kind": "vulnerability", "record": item, "limitations": "A CISA KEV record is threat intelligence, not evidence that your environment is affected, exposed, compromised, or unpatched.", "learning_steps": ["Review the affected product and version information against an authorized inventory.", "Read the original source record and vendor guidance before scheduling remediation.", "Document validated relevance and assign a local action only after human review."]}
@@ -438,7 +436,7 @@ def vulnerability_detail(cve_id: str) -> dict:
 @app.get("/api/threats/{reference_id}")
 def threat_detail(reference_id: str) -> dict:
     item = fetch_one("""SELECT t.reference_id, t.title, t.category, t.severity, t.confidence, t.summary, t.potential_relevance, t.source_count,
-                        t.published_at, t.tags, t.attack_techniques, t.demo, s.connector_key, s.source_url, s.source_item_key, s.revision, s.parser_version, s.retrieved_at, s.raw_content
+                        t.published_at, t.tags, t.attack_techniques, s.connector_key, s.source_url, s.source_item_key, s.revision, s.parser_version, s.retrieved_at, s.raw_content
                         FROM threats t LEFT JOIN source_documents s ON s.id = t.source_document_id WHERE t.reference_id = %s""", (reference_id,))
     if not item:
         raise HTTPException(404, "Threat record not found")
@@ -448,7 +446,7 @@ def threat_detail(reference_id: str) -> dict:
 
 @app.get("/api/news")
 def list_live_news(limit: int = Query(default=100, ge=1, le=500), offset: int = Query(default=0, ge=0), connector: str | None = None) -> dict:
-    filters = ["NOT t.demo", "s.connector_key LIKE '%%-rss'"]
+    filters = ["s.connector_key LIKE '%%-rss'"]
     params: list[object] = []
     if connector:
         filters.append("s.connector_key = %s")
@@ -473,11 +471,11 @@ def intelligence_explorer(
     news = fetch_all("""SELECT t.reference_id, t.title, t.summary, t.severity, t.tags, t.published_at, t.confidence,
                               s.connector_key, s.source_url
                        FROM threats t JOIN source_documents s ON s.id = t.source_document_id
-                       WHERE NOT t.demo AND s.connector_key LIKE '%%-rss'
+                       WHERE s.connector_key LIKE '%%-rss'
                        ORDER BY t.published_at DESC NULLS LAST, t.updated_at DESC LIMIT 1000""")
     vulnerabilities = fetch_all("""SELECT cve_id, title, description, severity, kev, exploitation_evidence, source_url,
                                         published_at, updated_at
-                                 FROM vulnerabilities WHERE NOT demo
+                                 FROM vulnerabilities
                                  ORDER BY published_at DESC NULLS LAST, updated_at DESC LIMIT 2500""")
     items = []
     if kind in {"all", "news"}:
@@ -1257,7 +1255,7 @@ def sync_enabled_connectors(payload: SyncRequest) -> dict:
 @app.post("/api/digests", status_code=201)
 def create_digest(payload: DigestCreate) -> dict:
     threats = fetch_all("SELECT reference_id, title, severity, confidence, summary, published_at FROM threats WHERE NOT archived ORDER BY CASE severity WHEN 'critical' THEN 1 WHEN 'high' THEN 2 ELSE 3 END, published_at DESC LIMIT 5")
-    lines = [f"# {payload.title}", "", f"Audience: {payload.audience}", "", "> Demo data — not live threat intelligence.", "", "## Direct answer", "Local records prioritize the following items for human review.", "", "## Evidence and recommended next steps"]
+    lines = [f"# {payload.title}", "", f"Audience: {payload.audience}", "", "> Source-reported intelligence stored locally. Validate evidence before acting.", "", "## Direct answer", "Local records prioritize the following items for human review.", "", "## Evidence and recommended next steps"]
     references = []
     for threat in threats:
         references.append(threat["reference_id"])
