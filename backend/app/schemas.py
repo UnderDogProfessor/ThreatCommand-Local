@@ -43,6 +43,10 @@ class DetectionValidationCreate(BaseModel):
     evidence: str = Field(default="", max_length=5000)
 
 
+class DetectionLabRunCreate(BaseModel):
+    fixture_id: Literal["expected-signal", "benign-look-alike", "missing-telemetry"]
+
+
 class CaseEvidenceCreate(BaseModel):
     evidence_type: Literal["fact", "claim", "inference", "artifact", "decision"]
     content: str = Field(min_length=2, max_length=10000)

@@ -107,8 +107,17 @@ def ensure_learning_library() -> None:
                     template_title = f"{segment} — {title} ({suffix})"
                     rule_format, content = rule_content(segment, title, technique, telemetry, variant)
                     cur.execute(
-                        """INSERT INTO detections (title, description, rule_format, rule_content, attack_techniques, required_telemetry, confidence, status, segment, learning_purpose, library_rank)
-                           VALUES (%s, %s, %s, %s, %s, %s, 'medium', 'draft', %s, true, %s)
+                        """INSERT INTO detections (title, description, rule_format, rule_content, attack_techniques, required_telemetry, confidence, status, segment, learning_purpose, library_rank, learning_level)
+                           VALUES (%s, %s, %s, %s, %s, %s, 'medium', 'draft', %s, true, %s, 'intermediate')
                            ON CONFLICT (segment, title) DO NOTHING""",
                         (template_title, f"Educational {variant} template for {title}. DRAFT — HUMAN REVIEW REQUIRED.", rule_format, content, [technique], [telemetry], segment, rank),
                     )
+        cur.execute(
+            """UPDATE detections
+               SET learning_level = CASE
+                   WHEN ((library_rank - 1) % 25) + 1 <= 7 THEN 'beginner'
+                   WHEN ((library_rank - 1) % 25) + 1 <= 18 THEN 'intermediate'
+                   ELSE 'advanced'
+               END
+               WHERE learning_purpose"""
+        )

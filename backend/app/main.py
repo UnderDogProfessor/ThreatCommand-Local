@@ -22,7 +22,8 @@ from starlette.responses import FileResponse, JSONResponse
 from app.config import get_settings
 from app.connectors import require_sync_permission, sync_cisa_kev, sync_nvd, sync_rss
 from app.db import connection, execute, fetch_all, fetch_one
-from app.schemas import AccessPassword, ActionCreate, BulkConnectorUpdate, CaseEvidenceCreate, ConnectorUpdate, CopilotRequest, DeletionConfirmation, DetectionCreate, DetectionMaturityUpdate, DetectionValidationCreate, DigestCreate, HuntCaseCreate, HuntFindingCreate, HuntStatusUpdate, IncidentCaseCreate, IncidentStatusUpdate, IocCreate, IocUpdate, RawContentPurgeRequest, RelevanceAssessmentUpdate, SemanticReindexRequest, SettingsUpdate, SyncRequest, TechnologyProfileCreate, WatchlistCreate, WatchlistItemCreate
+from app.detection_lab import evaluate_fixture, lab_material
+from app.schemas import AccessPassword, ActionCreate, BulkConnectorUpdate, CaseEvidenceCreate, ConnectorUpdate, CopilotRequest, DeletionConfirmation, DetectionCreate, DetectionLabRunCreate, DetectionMaturityUpdate, DetectionValidationCreate, DigestCreate, HuntCaseCreate, HuntFindingCreate, HuntStatusUpdate, IncidentCaseCreate, IncidentStatusUpdate, IocCreate, IocUpdate, RawContentPurgeRequest, RelevanceAssessmentUpdate, SemanticReindexRequest, SettingsUpdate, SyncRequest, TechnologyProfileCreate, WatchlistCreate, WatchlistItemCreate
 
 app = FastAPI(title="ThreatCommand Local API", version="0.2.0", description="Local-only defensive intelligence API. No external connector is enabled by default.")
 app.add_middleware(CORSMiddleware, allow_origins=["http://127.0.0.1:3000", "http://localhost:3000"], allow_methods=["*"], allow_headers=["*"], allow_credentials=True)
@@ -762,6 +763,51 @@ def add_detection_validation(detection_id: str, payload: DetectionValidationCrea
         row = cur.fetchone()
     write_audit_event("detection_validation_recorded", {"detection_id": detection_id, "outcome": payload.outcome})
     return row
+
+
+@app.get("/api/detection-lab/{detection_id}")
+def detection_lab_detail(detection_id: str) -> dict:
+    item = fetch_one("SELECT * FROM detections WHERE id = %s", (detection_id,))
+    if not item:
+        raise HTTPException(404, "Detection not found")
+    history = fetch_all(
+        """SELECT id, fixture_id, fixture_name, expected_match, observed_match, test_passed,
+                  matched_field, reasoning, fixture_event, created_at
+           FROM detection_lab_runs WHERE detection_id = %s ORDER BY created_at DESC LIMIT 30""",
+        (detection_id,),
+    )
+    return {"detection": item, **lab_material(item), "history": history}
+
+
+@app.post("/api/detection-lab/{detection_id}/run", status_code=201)
+def run_detection_lab_fixture(detection_id: str, payload: DetectionLabRunCreate) -> dict:
+    item = fetch_one("SELECT * FROM detections WHERE id = %s", (detection_id,))
+    if not item:
+        raise HTTPException(404, "Detection not found")
+    fixtures = {fixture["id"]: fixture for fixture in lab_material(item)["fixtures"]}
+    fixture = fixtures.get(payload.fixture_id)
+    if not fixture:
+        raise HTTPException(400, "Unknown built-in learning fixture")
+    result = evaluate_fixture(item, fixture)
+    with connection() as conn, conn.cursor() as cur:
+        cur.execute(
+            """INSERT INTO detection_lab_runs (detection_id, fixture_id, fixture_name, expected_match, observed_match,
+               test_passed, matched_field, reasoning, fixture_event)
+               VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING *""",
+            (detection_id, result["fixture_id"], result["fixture_name"], result["expected_match"], result["observed_match"],
+             result["test_passed"], result["matched_field"], result["reasoning"], Jsonb(result["event"])),
+        )
+        run = cur.fetchone()
+        evidence = (
+            f"Detection Lab fixture '{result['fixture_name']}': expected match={result['expected_match']}; "
+            f"observed match={result['observed_match']}. {result['reasoning']}"
+        )
+        cur.execute(
+            "INSERT INTO detection_validation_results (detection_id, fixture_name, outcome, evidence) VALUES (%s, %s, %s, %s)",
+            (detection_id, f"Detection Lab - {result['fixture_name']}", "pass" if result["test_passed"] else "fail", evidence),
+        )
+    write_audit_event("detection_lab_fixture_run", {"detection_id": detection_id, "fixture_id": payload.fixture_id, "test_passed": result["test_passed"]})
+    return {"run": run, "result": result}
 
 
 def static_detection_lint(item: dict) -> tuple[str, str]:
