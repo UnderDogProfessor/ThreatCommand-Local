@@ -12,9 +12,16 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # Ephemeral CI database only; local runs continue to require an untracked .env password.
+    env:
+      POSTGRES_PASSWORD: threatcommand-ci-ephemeral-only
     steps:
       - name: Check out source
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Create isolated CI configuration
+        run: |
+          cp .env.example .env
+          sed -i "s|^POSTGRES_PASSWORD=.*|POSTGRES_PASSWORD=${POSTGRES_PASSWORD}|" .env
       - name: Validate Compose configuration
         run: docker compose config --quiet
       - name: Build local containers
