@@ -113,12 +113,24 @@ Indexing is never automatic. If Ollama is unavailable, the app labels the fallba
 - CISA KEV connector implementation with provenance and request logging. It is disabled by default.
 - Five user-supplied public RSS connectors, plus MITRE ATT&CK STIX, all disabled by default.
 - A Command Center focused on locally synchronized KEVs, source-reported news, learning detections, local evidence details, and an opt-in external map.
-- 150 curated defensive learning templates: 50 each for On-Prem, Cloud, and Incident Response.
+- 150 curated defensive learning templates: 50 each for On-Prem, Cloud, and Incident Response, organized as Beginner, Intermediate, and Advanced learning paths.
+- A guided Detection Lab with three bundled, benign scenarios per learning template: an expected signal, a harmless administrative look-alike, and missing-telemetry practice. It never runs a query, command, attack technique, or external integration.
+- Progressive detection learning guidance for configuration, tuning, interview preparation, and locally saved lab results.
 - Opt-in local semantic retrieval: reviewed knowledge is chunked locally, embedded only through a configured localhost Ollama model, stored in pgvector, cited by the Copilot, and deleted with its source item. PostgreSQL keyword retrieval remains the explicit fallback.
 - Local Ollama status and a bounded Copilot retrieval endpoint; all answers remain draft analysis requiring evidence review.
 - Detection Studio support for Sigma, Microsoft Sentinel KQL, and defensive pseudocode drafts. Sigma is parsed locally with pySigma, while KQL remains a non-executing structural advisory.
 - Local Markdown digest generation and encrypted database backup/restore scripts, using Windows DPAPI when available and a passphrase-protected authenticated-encryption fallback otherwise.
 - A non-destructive backup verification drill that restores into an isolated temporary database, verifies the schema and key record counts, and removes the temporary database without changing the live workspace.
+
+## Practice detections in three steps
+
+Open **Detection Lab** in the local dashboard and follow the on-screen flow:
+
+1. Choose a learning detection from On-Prem, Cloud, or Incident Response.
+2. Pick a bundled safe scenario and run the local learning check.
+3. Open the focused configuration, tuning, or interview guidance when you are ready.
+
+The lab uses preloaded event metadata only. A recorded result shows whether the limited local learning evaluator observed the expected result; it is not proof that the detection is deployed, production-ready, or effective in a real environment. Raw sample data and previous practice results remain optional, expandable details so the main workflow stays simple.
 
 ## Network and connector workflow
 

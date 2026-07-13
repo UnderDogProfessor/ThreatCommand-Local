@@ -4,7 +4,7 @@ import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "re
 
 type Threat = { reference_id: string; title: string; category: string; severity: string; confidence: string; summary: string; potential_relevance: string; source_count: number; tags: string[]; attack_techniques: string[] };
 type Action = { id: string; title: string; action_type: string; priority: string; linked_reference?: string; created_at: string };
-type Detection = { id: string; title: string; description: string; rule_format: string; status: string; maturity?: string; telemetry_state?: string; attack_techniques: string[]; required_telemetry: string[]; segment?: string; learning_purpose?: boolean; library_rank?: number };
+type Detection = { id: string; title: string; description: string; rule_format: string; status: string; maturity?: string; telemetry_state?: string; attack_techniques: string[]; required_telemetry: string[]; segment?: string; learning_purpose?: boolean; library_rank?: number; learning_level?: "beginner" | "intermediate" | "advanced" };
 type Dashboard = { intelligence_notice: string; network_mode: string; posture: { score: number; label: string; inputs: string[]; limitation: string }; threats: Threat[]; actions: Action[]; coverage: { technique: string; status: string; count: number }[]; vulnerabilities: { cve_id: string; title: string; severity: string; kev: boolean; potential_relevance: string; recommended_action: string }[] };
 type DashboardWithStatus = Dashboard & { data_status?: { notice: string; total: number; live_kev_count: number } };
 type LiveOverview = { new_kev_7d: number; recent_kevs: { cve_id: string; title: string; severity: string; potential_relevance: string; source_url: string; published_at?: string }[]; live_news: { reference_id: string; title: string; summary: string; severity: string; tags: string[]; published_at?: string; source_url: string; connector_key: string }[]; zero_day_watch: { reference_id: string; title: string; summary: string; severity: string; published_at?: string; source_url: string; connector_key: string }[]; feed_health: { key: string; name: string; enabled: boolean; last_status: string; last_sync_at?: string; records_added: number; records_updated: number; records_failed: number }[]; learning_library: { segment: string; count: number }[] };
@@ -17,6 +17,10 @@ type ConnectorLog = { id: string; connector_key?: string; requested_at: string; 
 type DetailResponse = { kind: "vulnerability" | "threat" | "detection"; record: Record<string, any>; limitations?: string; learning_steps?: string[]; revisions?: { version: number; change_summary: string; created_at: string }[]; validation_results?: { fixture_name: string; outcome: string; evidence: string; created_at: string }[]; learning?: { what_to_learn: string; why_it_matters: string; technical_explanation: string; kill_chain: { phase: string; explanation: string }[]; detection_logic: string; false_positives: string; tuning: string; how_to_use: string; validation: string; limitations: string } };
 type NewsItem = { reference_id: string; title: string; summary: string; severity: string; tags: string[]; published_at?: string; confidence: string; connector_key: string; source_url: string };
 type NewsPage = { items: NewsItem[]; total: number; offset: number; limit: number };
+type LearningLevel = "beginner" | "intermediate" | "advanced";
+type LabFixture = { id: "expected-signal" | "benign-look-alike" | "missing-telemetry"; name: string; purpose: string; expected_match: boolean; event: Record<string, string> };
+type LabRun = { id: string; fixture_id: string; fixture_name: string; expected_match: boolean; observed_match: boolean; test_passed: boolean; matched_field: string; reasoning: string; fixture_event: Record<string, string>; created_at: string };
+type DetectionLabOverview = { detection: Detection; fixtures: LabFixture[]; configuration: string[]; improvements: string[]; interview: { question: string; answer: string }[]; lab_notice: string; history: LabRun[] };
 type Watchlist = { id: string; name: string; description: string; color: "cyan" | "amber" | "purple" | "red"; item_count: number; created_at: string; updated_at: string };
 type HuntCase = { id: string; name: string; objective: string; hypothesis: string; scope: string; status: "planned" | "active" | "complete" | "escalated"; attack_techniques: string[]; required_telemetry: string[]; linked_reference?: string; notes: string; created_at: string; updated_at: string };
 type IncidentCase = { id: string; title: string; summary: string; severity: "critical" | "high" | "medium" | "low"; status: "open" | "investigating" | "contained" | "closed"; linked_reference?: string; notes: string; tags: string[]; created_at: string; updated_at: string };
@@ -34,7 +38,7 @@ type SemanticStatus = { knowledge_items: number; chunks: number; indexed_chunks:
 type KnowledgeRetrieval = { mode: string; items: { knowledge_item_id: string; chunk_index: number; title: string; content: string; score: number }[]; warning: string; status: SemanticStatus };
 
 const api = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000";
-const nav = ["Command Center", "Review Queue", "Live Cybernews", "Intelligence Explorer", "Vulnerabilities", "Technology Profile", "IOC Lifecycle", "Watchlists", "Detection Studio", "Detection Lifecycle", "Threat Hunting", "Incident Notes", "Evidence Ledger", "Knowledge Base", "Digest Studio", "Feed Sources", "Data Lifecycle", "Audit Trail", "Local AI Copilot", "Settings"];
+const nav = ["Command Center", "Review Queue", "Live Cybernews", "Intelligence Explorer", "Vulnerabilities", "Technology Profile", "IOC Lifecycle", "Watchlists", "Detection Studio", "Detection Lab", "Detection Lifecycle", "Threat Hunting", "Incident Notes", "Evidence Ledger", "Knowledge Base", "Digest Studio", "Feed Sources", "Data Lifecycle", "Audit Trail", "Local AI Copilot", "Settings"];
 
 async function apiFetch(path: string, init: RequestInit = {}): Promise<Response> {
   const headers = new Headers(init.headers);
@@ -150,6 +154,7 @@ export default function Home() {
         {active === "IOC Lifecycle" && <IocLifecycleWorkspace />}
         {active === "Watchlists" && <WatchlistsWorkspace watchlists={watchlists} createWatchlist={createWatchlist} />}
         {active === "Detection Studio" && <InteractiveLearningLibrary detections={detections} openDetail={openDetail} />}
+        {active === "Detection Lab" && <DetectionLabWorkspace detections={detections} />}
         {active === "Detection Lifecycle" && <DetectionLifecycleWorkspace detections={detections} />}
         {active === "Threat Hunting" && <ThreatHuntingWorkspace hunts={hunts} createHunt={createHunt} updateStatus={updateHuntStatus} />}
         {active === "Incident Notes" && <IncidentNotesWorkspace incidents={incidents} createIncident={createIncident} updateStatus={updateIncidentStatus} />}
@@ -293,10 +298,12 @@ function LiveCommandCenter({ dashboard, setActive }: { dashboard: LiveDashboard;
 function LearningDetectionView({ detections }: { detections: Detection[] }) {
   const segments = ["On-Prem", "Cloud", "Incident Response"];
   const [segment, setSegment] = useState("On-Prem");
+  const [level, setLevel] = useState<"all" | LearningLevel>("all");
   const library = detections.filter((item) => item.learning_purpose);
-  const visible = library.filter((item) => item.segment === segment).sort((a, b) => (a.library_rank ?? 999) - (b.library_rank ?? 999));
+  const visible = library.filter((item) => item.segment === segment && (level === "all" || item.learning_level === level)).sort((a, b) => (a.library_rank ?? 999) - (b.library_rank ?? 999));
   return <GenericView title="Detection Learning Library" copy="Curated defensive learning templates. Every item is a DRAFT — HUMAN REVIEW REQUIRED and must be validated and tuned only in systems you are authorized to access." children={<>
     <div className="library-summary">{segments.map((name) => <button key={name} className={segment === name ? "selected" : ""} onClick={() => setSegment(name)}><b>{library.filter((item) => item.segment === name).length}</b>{name}</button>)}</div>
+    <div className="learning-level-filter" role="group" aria-label="Learning level">{(["all", "beginner", "intermediate", "advanced"] as const).map((name) => <button key={name} className={level === name ? "selected" : ""} onClick={() => setLevel(name)}>{name === "all" ? "All levels" : name}</button>)}</div>
     <div className="table learning-table">{visible.map((item) => <article key={item.id}><b>#{item.library_rank}</b><div><strong>{item.title}</strong><p>{item.description}</p><small>{item.attack_techniques.join(", ")} · Required telemetry: {item.required_telemetry.join(", ")}</small></div><span>{item.rule_format}</span><em>LEARNING DRAFT</em></article>)}</div>
     <p className="page-note">Showing all {visible.length} curated {segment.toLowerCase()} templates. They are educational references, not claims of production coverage.</p>
   </>}/>;
@@ -364,12 +371,63 @@ function InteractiveVulnerabilities({ page, openDetail }: { page: VulnerabilityP
 function InteractiveLearningLibrary({ detections, openDetail }: { detections: Detection[]; openDetail: (kind: DetailResponse["kind"], id: string) => void }) {
   const segments = ["On-Prem", "Cloud", "Incident Response"];
   const [segment, setSegment] = useState("On-Prem");
+  const [level, setLevel] = useState<"all" | LearningLevel>("all");
   const library = detections.filter((item) => item.learning_purpose);
-  const visible = library.filter((item) => item.segment === segment).sort((a, b) => (a.library_rank ?? 999) - (b.library_rank ?? 999));
+  const visible = library.filter((item) => item.segment === segment && (level === "all" || item.learning_level === level)).sort((a, b) => (a.library_rank ?? 999) - (b.library_rank ?? 999));
   return <GenericView title="Detection Learning Library" copy="Select a template to learn the behavior, ATT&CK mapping, telemetry requirement, draft rule or query, safe validation approach, and limitations." children={<>
     <div className="library-summary">{segments.map((name) => <button key={name} className={segment === name ? "selected" : ""} onClick={() => setSegment(name)}><b>{library.filter((item) => item.segment === name).length}</b>{name}</button>)}</div>
-    <div className="table learning-table">{visible.map((item) => <button className="detail-row" key={item.id} onClick={() => openDetail("detection", item.id)}><b>#{item.library_rank}</b><div><strong>{item.title}</strong><p>{item.description}</p><small>{item.attack_techniques.join(", ")} · Required telemetry: {item.required_telemetry.join(", ")}</small></div><span>{item.rule_format}</span><em>Study →</em></button>)}</div>
+    <div className="learning-level-filter" role="group" aria-label="Learning level">{(["all", "beginner", "intermediate", "advanced"] as const).map((name) => <button key={name} className={level === name ? "selected" : ""} onClick={() => setLevel(name)}>{name === "all" ? "All levels" : name}</button>)}</div>
+    <div className="table learning-table">{visible.map((item) => <button className="detail-row" key={item.id} onClick={() => openDetail("detection", item.id)}><b>#{item.library_rank}</b><div><strong>{item.title}</strong><p>{item.description}</p><small>{item.attack_techniques.join(", ")} · Required telemetry: {item.required_telemetry.join(", ")}</small></div><span><small className={`learning-level ${item.learning_level ?? "intermediate"}`}>{item.learning_level ?? "intermediate"}</small>{item.rule_format}</span><em>Study →</em></button>)}</div>
     <p className="page-note">Showing all {visible.length} curated {segment.toLowerCase()} templates. They are educational references, not claims of production coverage.</p>
+  </>}/>;
+}
+
+function DetectionLabWorkspace({ detections }: { detections: Detection[] }) {
+  const library = detections.filter((item) => item.learning_purpose);
+  const [selectedId, setSelectedId] = useState("");
+  const [lab, setLab] = useState<DetectionLabOverview | null>(null);
+  const [selectedFixtureId, setSelectedFixtureId] = useState<LabFixture["id"] | "">("");
+  const [notice, setNotice] = useState("");
+  const [running, setRunning] = useState(false);
+  const [showEvent, setShowEvent] = useState(false);
+
+  useEffect(() => {
+    setSelectedId((current) => library.some((item) => item.id === current) ? current : (library[0]?.id ?? ""));
+  }, [detections]);
+
+  useEffect(() => {
+    if (!selectedId) { setLab(null); return; }
+    let cancelled = false;
+    setLab(null); setNotice(""); setShowEvent(false);
+    getJson<DetectionLabOverview>(`/api/detection-lab/${encodeURIComponent(selectedId)}`).then((next) => {
+      if (cancelled) return;
+      setLab(next); setSelectedFixtureId(next.fixtures[0]?.id ?? "");
+    }).catch(() => { if (!cancelled) setNotice("The local Detection Lab could not load this learning template."); });
+    return () => { cancelled = true; };
+  }, [selectedId]);
+
+  const fixture = lab?.fixtures.find((item) => item.id === selectedFixtureId) ?? lab?.fixtures[0];
+  const runFixture = async () => {
+    if (!selectedId || !fixture) return;
+    setRunning(true); setNotice("");
+    try {
+      const response = await apiFetch(`/api/detection-lab/${encodeURIComponent(selectedId)}/run`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ fixture_id: fixture.id }) });
+      const data = await response.json();
+      if (!response.ok) { setNotice(data.detail ?? "The local fixture could not be evaluated."); return; }
+      setNotice(`Local fixture recorded: ${data.result.test_passed ? "expected result observed" : "result needs review"}.`);
+      setLab(await getJson<DetectionLabOverview>(`/api/detection-lab/${encodeURIComponent(selectedId)}`));
+    } catch { setNotice("The local fixture result could not be saved."); }
+    finally { setRunning(false); }
+  };
+
+  if (!library.length) return <GenericView title="Detection Lab" copy="Loading the local learning library…" />;
+  const cleanTitle = (title: string) => title.replace(/^[^—]+—\s*/, "");
+  return <GenericView title="Practice a Detection" copy="Pick one learning detection, try a safe scenario, then use the guidance to understand and improve it. No real commands, queries, or attacks are run." children={<>
+    <section className="lab-setup panel"><div className="lab-step"><span>1</span><div><p>CHOOSE A DETECTION</p><h2>{lab ? cleanTitle(lab.detection.title) : "Loading detection…"}</h2><small>{lab?.detection.segment ?? "Learning library"} · {lab?.detection.rule_format ?? "Preparing template"}</small></div></div><label className="lab-select">Detection<select value={selectedId} onChange={(event) => setSelectedId(event.target.value)}>{library.map((item) => <option key={item.id} value={item.id}>{item.segment} · #{item.library_rank} · {cleanTitle(item.title)}</option>)}</select></label><span className={`lab-level ${lab?.detection.learning_level ?? "intermediate"}`}>{lab?.detection.learning_level ?? "learning"}</span></section>
+    {lab && fixture && <>
+      <section className="lab-flow panel"><div className="lab-flow-heading"><div className="lab-step"><span>2</span><div><p>PICK A SAFE SCENARIO</p><h2>What do you want to test?</h2></div></div><small>Bundled local examples only</small></div><div className="lab-scenarios">{lab.fixtures.map((item) => <button key={item.id} className={fixture.id === item.id ? "selected" : ""} onClick={() => { setSelectedFixtureId(item.id); setShowEvent(false); }}><strong>{item.name}</strong><span>{item.purpose}</span><em>{item.expected_match ? "Should match" : "Should not match"}</em></button>)}</div><div className="lab-runbox"><div className="lab-step"><span>3</span><div><p>RUN THE LEARNING CHECK</p><h2>{fixture.name}</h2><small>Expected result: {fixture.expected_match ? "the pattern matches" : "the pattern does not match"}</small></div></div><div><button className="button" disabled={running} onClick={runFixture}>{running ? "Checking…" : "Run safe check"}</button><button className="lab-sample-toggle" onClick={() => setShowEvent(!showEvent)}>{showEvent ? "Hide sample data" : "View sample data"}</button></div></div>{notice && <p className="lab-result">{notice}</p>}{showEvent && <pre className="lab-sample">{JSON.stringify(fixture.event, null, 2)}</pre>}</section>
+      <section className="lab-learning"><div><p>LEARN WHAT TO DO NEXT</p><h2>Use these only when you are ready</h2></div><details open><summary><span>Configure the detection</span><small>Required logs, fields, and safe scope</small></summary><ul>{lab.configuration.map((item) => <li key={item}>{item}</li>)}</ul></details><details><summary><span>Improve and tune it</span><small>Reduce noise without hiding useful signal</small></summary><ul>{lab.improvements.map((item) => <li key={item}>{item}</li>)}</ul></details><details><summary><span>Prepare for an interview</span><small>Practice explaining the detection clearly</small></summary><div className="lab-interview-list">{lab.interview.map((item) => <article key={item.question}><strong>{item.question}</strong><p>{item.answer}</p></article>)}</div></details>{lab.history.length > 0 && <details className="lab-history"><summary><span>Previous practice results</span><small>{lab.history.length} saved locally</small></summary><div>{lab.history.slice(0, 8).map((run) => <article key={run.id}><b className={run.test_passed ? "pass" : "fail"}>{run.test_passed ? "PASS" : "REVIEW"}</b><div><strong>{run.fixture_name}</strong><small>Expected {String(run.expected_match)} · Observed {String(run.observed_match)}</small></div><time>{new Date(run.created_at).toLocaleString()}</time></article>)}</div></details>}</section>
+    </>}
   </>}/>;
 }
 
